@@ -1,0 +1,139 @@
+---
+title: "Module 1 By Brian Weinfeld"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+**Principles of Data Visualization and Introduction to ggplot2**
+
+I have provided you with data about the 5,000 fastest growing companies in the US, as compiled by Inc. magazine. lets read this in:
+
+```{r}
+inc <- read.csv("https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module1/Data/inc5000_data.csv", header= TRUE)
+```
+
+And lets preview this data:
+
+```{r}
+head(inc)
+```
+
+```{r}
+summary(inc)
+```
+
+Think a bit on what these summaries mean. Use the space below to add some more relevant non-visual exploratory information you think helps you understand this data:
+
+```{r}
+library(tidyverse)
+
+#Summary of Employees by Industry
+inc %>%
+  filter(complete.cases(.)) %>%
+  group_by(Industry) %>%
+  summarise(count = n(),
+            min = min(Employees),
+            avg = mean(Employees),
+            med = median(Employees),
+            max = max(Employees)) %>%
+  arrange(desc(med))
+
+#Number of Unique Cities Appears by State
+inc %>%
+  group_by(State) %>%
+  summarise(Cities = n_distinct(City)) %>%
+  arrange(desc(Cities))
+
+#Summary of Growth Rate by Industry
+inc %>%
+  filter(complete.cases(.)) %>%
+  group_by(Industry) %>%
+  summarise(count = n(),
+            min = min(Growth_Rate),
+            avg = mean(Growth_Rate),
+            med = median(Growth_Rate),
+            max = max(Growth_Rate)) %>%
+  arrange(desc(med))
+
+#Correlation between Number of Employees and Growth Rate
+temp <- inc %>%
+  filter(complete.cases(.))
+cor(temp$Employees, temp$Growth_Rate)
+```
+
+## Question 1
+
+Create a graph that shows the distribution of companies in the dataset by State (ie how many are in each state). There are a lot of States, so consider which axis you should use. This visualization is ultimately going to be consumed on a 'portrait' oriented screen (ie taller than wide), which should further guide your layout choices.
+
+```{r fig.height=10, fig.width=7}
+inc %>%
+  group_by(State) %>%
+  count() %>%
+  ggplot(aes(reorder(State, n), n)) +
+  geom_bar(aes(fill=n), stat='identity', show.legend = FALSE) +
+  geom_text(aes(y = n + 15, label=n)) +
+  coord_flip() + 
+  scale_fill_continuous(low='blue', high='red') +
+  scale_y_continuous(expand = c(0, 0, .02, .02), labels=seq(0, 800, 50), breaks = seq(0, 800, 50)) +
+  theme_bw() + 
+  theme(panel.grid.major.y = element_blank(),
+        axis.text.y = element_text(size=17, family='mono'),
+        axis.text.x = element_text(size=14),
+        axis.title = element_text(size=20),
+        plot.title = element_text(size=25, face='bold'),
+        plot.subtitle = element_text(size=12)) +
+  labs(title = 'Fastest Growing Companies By State', 
+       subtitle = 'By Brian Weinfeld',
+       y = 'Number of Companies',
+       x = 'State')
+```
+
+## Question 2
+
+Lets dig in on the state with the 3rd most companies in the data set. Imagine you work for the state and are interested in how many people are employed by companies in different industries. Create a plot that shows the average and/or median employment by industry for companies in this state (only use cases with full data, use R's `complete.cases()` function.) In addition to this, your graph should show how variable the ranges are, and you should deal with outliers.
+
+```{r}
+inc %>%
+  filter(complete.cases(.),
+         State == 'NY') %>%
+  ggplot(aes(reorder(Industry, Employees, FUN=median), Employees)) +
+  geom_boxplot() +
+  scale_y_log10(labels = scales::comma) +
+  scale_x_discrete(expand = c(0.05, 0.05, 0.05, 0.05)) +
+  annotation_logticks(sides = 'l') + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = -30, vjust = 1, hjust = 0),
+        panel.grid.minor.y = element_blank(),
+        plot.margin = margin(0, 75, 0, 0)) +
+  labs(title = 'Distribution of Employees by Industry in New York',
+       subtitle = 'By Brian Weinfeld',
+       x = 'Industry')
+```
+
+## Question 3
+
+Now imagine you work for an investor and want to see which industries generate the most revenue per employee. Create a chart that makes this information clear. Once again, the distribution per industry should be shown.
+
+```{r}
+inc %>%
+  filter(!is.na(Revenue),
+         !is.na(Employees)) %>%
+  transform(Per = Revenue / Employees) %>%
+  ggplot(aes(reorder(Industry, Per, FUN=median), Per)) +
+  geom_boxplot() +
+  scale_y_log10(labels = scales::comma) +
+  scale_x_discrete(expand = c(.05, .05, .05, .05)) +
+  annotation_logticks(sides='l') +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = -30, vjust = 1, hjust = 0),
+        panel.grid.minor.y = element_blank(),
+        plot.margin = margin(0, 100, 0, 0)) +
+  labs(title = 'Revenue Per Employee By Industry',
+       subtitle = 'By Brian Weinfeld',
+       x = 'Industry',
+       y = 'Revenue / Employee')
+
+```
+
+
