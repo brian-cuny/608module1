@@ -13,35 +13,19 @@ ui <- fluidPage(
       ),
   div(
     div(class='well col-xs-2',
-        selectInput('Cause', label='Cause', choices = data.2010 %>%
-                                                            select(cause) %>%
-                                                            unique()),
-        selectInput('Region', label='Region', choice = c("All", data.2010 %>%
-                                                            select(region) %>%
-                                                            unique())),
+        selectInput('Cause', label='Cause', choices = causes),
+        selectInput('Region', label='Region', choice = regions),
         conditionalPanel(condition = 'input.Region == "South"',
-                          selectInput('South', label='Division', choice = data.2010 %>%
-                                                      filter(region == 'South') %>%
-                                                      select(division) %>%
-                                                      unique())
+                          selectInput('South', label='Division', choice = division.south)
                          ),
         conditionalPanel(condition = 'input.Region == "West"',
-                         selectInput('West', label='Division', choice = data.2010 %>%
-                           filter(region == 'West') %>%
-                           select(division) %>%
-                           unique())
+                         selectInput('West', label='Division', choice = division.west)
                          ),
         conditionalPanel(condition = 'input.Region == "Northeast"',
-                         selectInput('Northeast', label='Division', choice = data.2010 %>%
-                           filter(region == 'Northeast') %>%
-                           select(division) %>%
-                           unique())
+                         selectInput('Northeast', label='Division', choice = division.northeast)
                          ),
         conditionalPanel(condition = 'input.Region == "Midwest"',
-                         selectInput('Midwest', label='Division', choice = data.2010 %>%
-                           filter(region == 'Midwest') %>%
-                           select(division) %>%
-                           unique())
+                         selectInput('Midwest', label='Division', choice = division.midwest)
                          ),
         actionButton('action', 'Filter', class='btn btn-primary btn-block')
     ),
@@ -57,34 +41,50 @@ server <- function(input, output){
       filter(cause == input$Cause)
     if(input$Region != 'All'){
       if(input$Region == 'South'){
-        to.ret %<>% filter(division == input$South)
+        if(input$South == 'All'){
+          to.ret %<>% filter(region == input$Region)
+        }else{
+          to.ret %<>% filter(division == input$South)
+        }
       }else if(input$Region == 'Northeast'){
-        to.ret %<>% filter(division == input$Northeast)
+        if(input$Northeast == 'All'){
+          to.ret %<>% filter(region == input$Region)
+        }else{
+          to.ret %<>% filter(division == input$Northeast)
+        }
       }else if(input$Region == 'Midwest'){
-        to.ret %<>% filter(division == input$Midwest)
-      }else{
-        to.ret %<>% filter(division == input$West) 
+        if(input$Midwest == 'All'){
+          to.ret %<>% filter(region == input$Region)
+        }else{
+          to.ret %<>% filter(division == input$Midwest)
+        }
+      }else if(input$Region == 'West'){
+        if(input$West == 'All'){
+          to.ret %<>% filter(region == input$Region)
+        }else{
+          to.ret %<>% filter(division == input$West) 
+        }
       }
     }
     to.ret
   })
   
   output$plot <- renderPlot({
-    data() %>%
+    to.plot <- data()
+    
+    to.plot %>%
       plot_usmap(data=., values='rate') +
       scale_fill_continuous(low='white', high='red', name='Deaths (per 100k)') +
-      theme(legend.position=c(.5, -.1), legend.direction='horizontal') +
-      labs(title=paste0('2010 Deaths (per 100k) from "', input$Cause, '"'))
-  })
+      theme(legend.position=c(.5, .05), legend.direction='horizontal') +
+      labs(title=paste0('2010 Deaths (per 100k) from "', to.plot$cause[1], '"'))
+  }, height=500)
   
   output$table <- renderDataTable({
-    data()
+    data() %>%
+      select(-cause)
   })
 }
 
 shinyApp(ui, server)
-
-
-
 
 
