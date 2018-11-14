@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part 2</title>
+</head>
+<body>
+  <p>
+    Write a function to load the presidents.csv data and display the data as an html table (you  may use a cdv parser
+    from any available library, though I encourage you to try the d3 one).
+  </p>
+  <table id="presidents">
+
+  </table>
+  <p id="test">
+
+  </p>
+  <p>
+    Now that you have the presidents data loaded, write a function that will return that president’s height & weight
+    when you type it in. This can be typed into either an input box or an alert box, and then print the result in a
+    box or on the webpage.
+  </p>
+  <form>
+    <input type="text" id="president-selection" value="President"/>
+    <input type="submit" id="president-submit" value="Search"/>
+  </form>
+  <div id="results">
+
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.4/d3.min.js"></script>
+  <script src="part2.js"></script>
+</body>
+</html>
