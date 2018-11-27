@@ -18,7 +18,7 @@
           <input class="form-control form-control-lg" id="metro-filter" placeholder="Filter"/>
         </div>
         <div class="form-group">
-          <label class='col-form-label col-form-label-lg' for="metro-select">Select Counties: <span id="metro-remaining">10</span></label>
+          <label class='col-form-label col-form-label-lg' for="metro-select">Select Counties: <span id="metro-remaining">6</span></label>
           <select class='form-control form-control-lg' id="metro-select" name="metro-select" multiple size="10">
             {% for ele in metros %}
               <option value="{{ ele['id'] }}">{{ ele['metro'] }}</option>
@@ -31,9 +31,48 @@
   </div>
   <br/>
   <br/>
+  <div class="container-fluid">
+    <div class="col-12">
+      <div id="viz">
 
-  <div id="viz">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4">
+        <div id="metro-1">
+
+        </div>
+      </div>
+      <div class="col-4">
+        <div id="metro-2">
+
+        </div>
+      </div>
+      <div class="col-4">
+        <div id="metro-3">
+
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4">
+        <div id="metro-4">
+
+        </div>
+      </div>
+      <div class="col-4">
+        <div id="metro-5">
+
+        </div>
+      </div>
+      <div class="col-4">
+        <div id="metro-6">
+
+        </div>
+      </div>
+    </div>
   </div>
+
 
   {{ moment.include_jquery() }}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>

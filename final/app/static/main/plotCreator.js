@@ -3,14 +3,15 @@
     //Select Limitation
     var lastValidSelection = null;
     var $countyRemaining = $('#metro-remaining');
+    var MAXSELECTIONS = 6;
 
     $('#metro-select').change(function(event) {
         var length = $(this).val().length;
-        if (length > 10) {
+        if (length > MAXSELECTIONS) {
           $(this).val(lastValidSelection);
         } else {
           lastValidSelection = $(this).val();
-          $countyRemaining.text(10 - length);
+          $countyRemaining.text(MAXSELECTIONS - length);
         }
     });
 
@@ -18,7 +19,6 @@
     //Filter Select
     $("#metro-filter").on('change keyup', function(event){
         var filterText = $(this).val().toUpperCase().split(', ');
-        console.log(filterText);
         $('option').each(function(){
             $(this).show();
             for(var filter in filterText){
@@ -34,21 +34,48 @@
     //AJAX Query
     $('#submit').on('click', function(e){
        e.preventDefault();
+       for(var i in [1, 2, 3, 4, 5, 6, 7]) {
+           $('#metro-'+i).empty();
+       }
        $.ajax({
             type: 'GET',
             url: "/metro",
             data: {'metros': JSON.stringify($('#metro-select').val())},
             dataType: 'json',
-            success: function(data){
-                displayPlot(data);
+            success: function(input){
+                displayPlot(input['line']);
+                displayCircle(input['circle']);
             }
         });
 
     });
 
+    function displayCircle(input){
+        var filteredData = _.groupBy(input, 'sort_by');
+        var metro = 1;
+        for(var ele in filteredData) {
+            var data = [];
+            values = _.map(filteredData[ele], function (d) {
+                return d.population;
+            });
+            labels = _.map(filteredData[ele], function (d) {
+                return d.county;
+            });
+            data.push({
+                values: values,
+                labels: labels,
+                hoverinfo: "label+percent+value",
+                hole: .4,
+                type: "pie"
+            });
+            var layout = {"title":filteredData[ele][0]['metro']};
+            Plotly.newPlot(document.getElementById('metro-'+metro++), data, layout);
+        }
+    }
 
-    function displayPlot(data){
-        var filteredData = _.groupBy(data, 'sort_by');
+
+    function displayPlot(input){
+        var filteredData = _.groupBy(input, 'sort_by');
         var data = [];
         var labelData = [];
         for(var ele in filteredData){
@@ -58,7 +85,10 @@
                 x: xData,
                 y: yData,
                 type: 'scatter',
-                mode: 'lines'
+                mode: 'lines+markers',
+                marker:{
+                    size: 10
+                }
             });
             data.push({
                 x: [xData[0], xData[xData.length-1]],
@@ -78,7 +108,7 @@
                 y: yData[0],
                 xanchor: 'right',
                 yanchor: 'middle',
-                text: filteredData[ele][0]['sort_by'] + ' ' + yData[0].toLocaleString(),
+                text: filteredData[ele][0]['sort_by'].split(/[-,]/)[0] + ' ' + yData[0].toLocaleString(),
                 showarrow: false,
                 font: {
                     family: 'Arial',
@@ -105,6 +135,10 @@
 
         var layout = {
             showlegend: false,
+            margin: {
+              l: 100,
+              r: 100
+            },
             xaxis: {
                 showline: true,
                 showgrid: false,
@@ -148,24 +182,10 @@
         };
 
         layout.annotations = $.extend(layout.annotations, labelData);
-        console.log(layout);
 
         var VIZ = document.getElementById('viz');
         Plotly.newPlot(VIZ, data, layout);
     }
 }(window.jQuery, window, document));
 
-    // function displayPlot(data){
-    //     var filteredData = _.groupBy(data, 'sort_by');
-    //         data = [];
-    //         for(var ele in filteredData){
-    //             data.push({
-    //                 x: _.map(filteredData[ele], function(d){ return d.year}),
-    //                 y: _.map(filteredData[ele], function(d){ return d.population}),
-    //                 name: filteredData[ele][0]['sort_by']
-    //             });
-    //         }
-    //
-    //         var VIZ = document.getElementById('viz');
-    //         Plotly.newPlot(VIZ, data);
-    // }
+
