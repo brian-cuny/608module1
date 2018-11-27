@@ -2,9 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Index</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="{{ url_for('static', filename='fontawesome/css/font-awesome.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='progress/nprogress.css') }}" rel="stylesheet"/>
+  <title>Brian Weinfeld's 608 Final Project</title>
 </head>
 <body>
+  <div class="container-fluid">
+    <div class="col-12">
+      <form method="POST">
+        <div class="form-group">
+          <label class="col-form-label col-form-label-lg" for="metro-filter">Filter:</label>
+          <input class="form-control form-control-lg" id="metro-filter" placeholder="Filter"/>
+        </div>
+        <div class="form-group">
+          <label class='col-form-label col-form-label-lg' for="metro-select">Select Counties: <span id="metro-remaining">10</span></label>
+          <select class='form-control form-control-lg' id="metro-select" name="metro-select" multiple size="10">
+            {% for ele in metros %}
+              <option value="{{ ele['id'] }}">{{ ele['metro'] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button id='submit' type="submit" class="btn btn-primary">Display</button>
+      </form>
+    </div>
+  </div>
+  <br/>
+  <br/>
 
+  <div id="viz">
+  </div>
+
+  {{ moment.include_jquery() }}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script src="{{ url_for('static', filename='progress/nprogress.js') }}"></script>
+  {{ moment.include_moment() }}
+  <script src="{{ url_for('static', filename='main/index.js') }}"></script>
+  <script src="{{ url_for('static', filename='main/plotCreator.js') }}"></script>
 </body>
 </html>

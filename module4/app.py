@@ -4,6 +4,7 @@ import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
 import numpy as np
+from flask import jsonify
 
 mapbox_access_token = 'pk.eyJ1IjoiYnJpYW4tY3VueSIsImEiOiJjam5ha3h0MWw1M3h1M3huMW5iMnNjN2FxIn0.EC3dchAkxGcJJfixv0zNNw'
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css']
@@ -12,7 +13,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://s
 trees = pd.read_json('https://data.cityofnewyork.us/resource/nwxe-4ae8.json?$limit=30000')
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
+server = app.server
 
 app.layout = html.Div(style={'backgroundColor': 'white'}, children=[
     html.Div([
@@ -285,6 +286,45 @@ def update_steward(data):
             showlegend=False
         )
     }
+
+
+@server.route('/api/borough/<string:value>')
+def test(value):
+    if value == 'bronx':
+        trees_copy = trees[trees['boroname'] == 'Bronx'].copy()
+    elif value == 'brooklyn':
+        trees_copy = trees[trees['boroname'] == 'Brooklyn'].copy()
+    elif value == 'queens':
+        trees_copy = trees[trees['boroname'] == 'Queens'].copy()
+    elif value == 'staten':
+        trees_copy = trees[trees['boroname'] == 'Staten Island'].copy()
+    elif value == 'manhattan':
+        trees_copy = trees[trees['boroname'] == 'Manhattan'].copy()
+    else:
+        trees_copy = trees.copy()
+
+    return trees_copy.to_json(orient='records')
+
+
+@server.route('/api/health/<string:health>')
+def health(health):
+    if health == 'good':
+        trees_copy = trees[trees['health'] == 'Good'].copy()
+    elif health == 'fair':
+        trees_copy = trees[trees['health'] == 'Fair'].copy()
+    elif health == 'poor':
+        trees_copy = trees[trees['health'] == 'Poor'].copy()
+    else:
+        trees_copy = trees.copy()
+
+    return trees_copy.to_json(orient='records')
+
+
+@server.route('/api/tree-id/<int:id>')
+def tree_id(id):
+    trees_copy = trees[trees['tree_id'] == id].copy()
+
+    return trees_copy.iloc[0, :].to_json()
 
 
 if __name__ == '__main__':
